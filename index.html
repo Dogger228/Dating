@@ -812,35 +812,34 @@
     }
 
     // Отправка в Telegram СРАЗУ НА ДВА ID
-    // Отправка в Telegram СРАЗУ НА ДВА ID
+// Отправка в Telegram с защитой от ошибок (отправляет туда, куда может)
     function sendToTelegram() {
-      const token = '9134274537:AAHzqL7KK59AZt8s65REQrqvulOARG4bAXo'; // Токен вашего бота
-      const chatIds = ['1902506994', '614249265']; // Ваши ID
+      const token = '9134274537:AAHzqL7KK59AZt8s65REQrqvulOARG4bAXo'; 
+      const chatIds = ['1902506994', '614249265'];
 
       const text = `🎉 Ура! Свидание подтверждено!\n\n📅 День: ${chosenDay}\n⏰ Время: ${chosenTime}\n📍 Место: ${chosenPlace}`;
-
-      let successCount = 0;
 
       chatIds.forEach(chatId => {
         const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`;
 
         fetch(url)
-          .then(response => {
-            if (response.ok) {
-              successCount++;
-              if (successCount === chatIds.length) {
-                const btn = document.getElementById('confirmBtn');
-                btn.innerText = 'Отправлено обоим! ❤️';
-                btn.style.background = '#4bb543';
-              }
+          .then(response => response.json())
+          .then(data => {
+            if (data.ok) {
+              console.log(`Успешно отправлено на ID: ${chatId}`);
             } else {
-              console.error(`Ошибка при отправке на ${chatId}`);
+              console.warn(`Не удалось отправить на ID ${chatId} (возможно, нет /start):`, data.description);
             }
           })
           .catch(error => {
             console.error('Ошибка сети:', error);
           });
       });
+
+      // Меняем интерфейс для неё, даже если один из чатов не ответил
+      const btn = document.getElementById('confirmBtn');
+      btn.innerText = 'Отправлено! ❤️';
+      btn.style.background = '#4bb543';
     }
 
     // Шкала извинений
